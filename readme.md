@@ -24,15 +24,13 @@ var options = {
 	height:	(options.height ?options.height :'auto'),
 	width:	(options.width ?options.width :'auto'),
 	buttons:{	//not required
-		default: 'Save',
+		default: 'Save',	//caption of button to select when user presses Enter key
 		Save: function(dlg, btnCaption){	//dlg = div container of dlg
 			alert(111)
 		}
 	}
 }
 ```			
-
-
 
 ## Thanks To
 https://developer.mozilla.org/

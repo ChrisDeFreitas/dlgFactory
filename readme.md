@@ -9,10 +9,10 @@ Personal project.  Contact me for details if you wish to use.
 	-- message can be html or text
 
 - dlgFactory.bigText(message, title)  
-	-- assume message is string (not html)
+	-- assume message is string (not html)  
 	-- dlg content: <textarea>message</textarea>
 
-	- dlgFactory.create(options)  
+- dlgFactory.create(options)  
 		-- general purpose entry point
 ```Javascript		
 var options = {

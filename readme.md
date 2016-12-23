@@ -3,7 +3,7 @@
 Personal project.  Contact me for details if you wish to use.
 
 ## Features
-- dialog boxes: drag to position, close button, dynamically managed  
+- dialog boxes: drag to position, close button, dynamically managed, simple css  
 
 - dlgFactory.msg(message, title)  
 	-- message can be html or text
@@ -18,7 +18,7 @@ Personal project.  Contact me for details if you wish to use.
 var options = {
 	title:	(title===undefined ?"Message" :title),
 	body: 	(html or text),
-	focusId: (null  or provide element id eg '#inpDelay'),
+	focusId: (null  or provide element id eg '#inpDelay'),	//element to focus on show
 	left: 	(options.left ?options.left :'50vw'),
 	top:		(options.top ?options.top :'40vh'),
 	height:	(options.height ?options.height :'auto'),

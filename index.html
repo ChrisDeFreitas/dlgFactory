@@ -7,8 +7,66 @@
 			  integrity="sha256-5i/mQ300M779N2OVDrl16lbohwXNUdzL/R2aVUXyXWA="
 			  crossorigin="anonymous"></script>
 <script>
+function pageInit(){
+	//allow dlg's to be dragged across doc with drag cursor:
+	document.addEventListener('dragover', function(event){event.preventDefault(); })
+	document.addEventListener('drop', function(event){event.preventDefault(); })
+	var options = {
+		title: 'Test 1',
+		body: 'Hey, Hey Hey! The end is nigh!!!',
+		//top:'20vh', left:'40vw', width:'30em'
+	}
+	dlgFactory0.create(options)
+	dlgFactory0.bigText('Hi')
+
+	var rules = [
+ `.divDlg{ display:block; position:absolute; left:30vw; top:10vh;
+background: #fff;	border: 2px solid #fff; outline: 2px outset silver;
+padding:0.25em; margin:0; width: auto;
+font-family:arial; font-weight:normal; text-align:center;
+}`,
+ `.dlgHeader {
+background: #a0f0a0;	border:0;	border-radius:0.25em; cursor:pointer; padding:0.25em; margin:0;
+font-size:1.2em; font-weight:bold;
+}`,
+ `.dlgBody{
+border:0;	padding:0.5em; margin:0;
+color:#222; font-weight:normal;	text-align:left;
+font-size:1em;
+}`,
+ `.dlgTextArea{ border:inset 1px silver; font-family:arial; font-size:1em; padding:0.5em; height:25vh; width:25vw; }`,
+ `.dlgFooter{
+border:0;	padding:0.5em 1em 0 1em; margin:0;
+text-align:right;
+}`,
+ `.dlgButton{
+ background: #a0f0a0;	 border:0; cursor:pointer;
+ color:#fff; font-size:0.8em;
+}`,
+ `.dlgButton:hover{
+ color:#272;
+}`
+	]
+	addStylesheetRules(rules)
+
+	var options = {
+		title: 'Control Panel',
+		body: `
+		<style>#cpDiv{color:#000} #cpDiv label{display:block;} #cpDiv button{width:5em; float:right}</style>
+		<div id=cpDiv>
+		<label> msg(hi): <button onclick="dlgFactory0.msg('Hi','Control Panel Test')" class=dlgButton>Test</button></label>
+		<label> bubble(what!?): <button onclick="dlgFactory0.bbl('What!?','Control Panel Test')" class=dlgButton>Test</button></label>
+		</div>
+		`,
+		top:'20vh', left:'70vw', width:'20em'
+	}
+	dlgFactory0.create(options)
+
+}
+
 var dlgFactory0 = {
 	list: [],
+	bbls:	[],		//list of bubble messages
 	options: null,
 	lastid: 0,
 
@@ -29,7 +87,7 @@ var dlgFactory0 = {
 	<button onclick="dlgFactory0.close('${id}')">Close</button>
 </div>
 `
-var dlg = document.createElement("DIV")
+	var dlg = document.createElement("DIV")
 		dlg.id = id
 		dlg.className='divDlg'
 		dlg.style=`left:${left};top:${top};width:${width};height:${height};`
@@ -38,6 +96,23 @@ var dlg = document.createElement("DIV")
 		dlg.dlgFactory0 = this
 		this.list.push(dlg)
 		document.body.appendChild(dlg)
+	},
+	bbl: function(msg){
+		//assume msg is text not html
+		var id = 'bbl'+(++this.lastid)
+		var bbl = document.createElement("DIV")
+		bbl.id = id
+		bbl.className='divBubble'
+		//dlg.style=`left:${left};top:${top};width:${width};height:${height};`
+		bbl.innerHTML = msg
+		bbl.DLGID = this.list.length
+		bbl.dlgFactory0 = this
+		bbl.onclick = function(){
+				this.dlgFactory0.msg(this.innerHTML,"Bubble Message")
+		}
+		this.bbls.push(bbl)		//bbls
+		document.body.appendChild(bbl)
+		bbl.style = 'opacity:1;'
 	},
 	close: function(dlgid){
 		var dlg = this.get(dlgid)
@@ -57,8 +132,7 @@ var dlg = document.createElement("DIV")
 	bigText: function(msg, title){
 		var options = {
 			title: (title===undefined ?"Information" :title),
-			body: `<textarea class='dlgTextArea'>
-${msg}</textarea>`,
+			body: `<textarea class='dlgTextArea'>${msg}</textarea>`,
 			top:'35vh', left:'35vw'
 		}
 		this.create(options)
@@ -71,7 +145,7 @@ ${msg}</textarea>`,
 		}
 		return false
 	},
-	dragStart: function(event, $dragCtrl) {	//allow dragging of windows with eyeball
+dragStart: function(event, $dragCtrl) {	//allow dragging of windows with eyeball
 	/*
 		bug: event.screenX/Y not always reported correctly in FF or same version on different computers,
 				onDragStart event.screenX/Y, but onDragEnd event.screenX/Y may be off
@@ -99,7 +173,7 @@ ${msg}</textarea>`,
 		//causes drag to fail:  event.preventDefault();
 		//don't return anything either: return EventStopBubbling(event);
 	},
-	dragEnd: function(event, $dragCtrl) {	//allow dragging of windows with eyeball
+dragEnd: function(event, $dragCtrl) {	//allow dragging of windows with eyeball
 	/*
 	bug: event.screenX/Y not always reported correctly in FF or same version on different computers,
 			onDragStart event.screenX/Y, but onDragEnd event.screenX/Y may be off
@@ -118,48 +192,6 @@ ${msg}</textarea>`,
 		return false
 	}
 }
-function pageInit(){
-	//allow dlg's to be dragged across doc with drag cursor:
-	document.addEventListener('dragover', function(event){event.preventDefault(); })
-	document.addEventListener('drop', function(event){event.preventDefault(); })
-	var options = {
-		title: 'Test 1',
-		body: 'Hey, Hey Hey! The end is nigh!!!',
-		//top:'20vh', left:'40vw', width:'30em'
-	}
-	dlgFactory0.create(options)
-	dlgFactory0.bigText('Hi')
-
-	var rules = [
-`.divDlg{ display:block; position:absolute; left:30vw; top:10vh;
-background: #fff;	border: 2px solid #fff; outline: 2px outset silver;
-padding:0.25em; margin:0; width: auto;
-font-family:arial; font-weight:normal; text-align:center;
-}`,
-`.dlgHeader {
-background: #a0f0a0;	border:0;	border-radius:0.25em; cursor:pointer; padding:0.25em; margin:0;
-font-size:1.2em; font-weight:bold;
-}`,
-`.dlgBody{
-border:0;	padding:0.5em; margin:0;
-color:#222; font-weight:normal;	text-align:left;
-font-size:1em;
-}`,
-`.dlgTextArea{ border:inset 1px silver; font-family:arial; font-size:1em; padding:0.5em; height:25vh; width:25vw; }`,
-`.dlgFooter{
-border:0;	padding:0.5em 1em 0 1em; margin:0;
-text-align:right;
-}`,
-`.dlgFooter button{
- background: #a0f0a0;	 border:0; cursor:pointer;
- color:#fff; font-size:0.8em;
-}`,
-`.dlgFooter button:hover{
- color:#272;
-}`
-	]
-	addStylesheetRules(rules)
-}
 
 function addStylesheetRules (rules) {
   var styleEl = document.createElement('style'),
@@ -173,14 +205,14 @@ function addStylesheetRules (rules) {
 
 //allow dragging of windows with eyeball
 function dragStart(event, $dragCtrl) {
-/*
+ /*
 	bug: event.screenX/Y not always reported correctly in FF or same version on different computers,
 			onDragStart event.screenX/Y, but onDragEnd event.screenX/Y may be off
 			therefore on some machines it may be impossible to position dragged controls
 
 			fails on:
 				Windows7 FF v44, 43, 42
-*/
+ */
 	var targ	= event.target,
 			parent= $dragCtrl[0],
 			ofs 	= $dragCtrl.offset();
@@ -202,11 +234,11 @@ function dragStart(event, $dragCtrl) {
 	//don't return anything either: return EventStopBubbling(event);
 }
 function dragEnd(event, $dragCtrl) {	//allow dragging of windows with eyeball
-/*
-bug: event.screenX/Y not always reported correctly in FF or same version on different computers,
+ /*
+ bug: event.screenX/Y not always reported correctly in FF or same version on different computers,
 		onDragStart event.screenX/Y, but onDragEnd event.screenX/Y may be off
 		therefore on some machines it may be impossible to position dragged controls
-*/
+ */
 	var targ	= event.target,
 			parent= $dragCtrl[0],	//targ.parentNode,
 			ofs 	= $dragCtrl.offset(),
@@ -218,15 +250,14 @@ bug: event.screenX/Y not always reported correctly in FF or same version on diff
 	return EventStopBubbling(event);
 }
 function EventStopBubbling(e) {
-//if(e.preventDefault) e.preventDefault();
-if(e.stopPropagation) e.stopPropagation();
-else e.cancelBubble=true;
-return false;
+	//if(e.preventDefault) e.preventDefault();
+	if(e.stopPropagation) e.stopPropagation();
+	else e.cancelBubble=true;
+	return false;
 }
 </script>
 <style>
-	body{background:#000;color:#fff;font-size:12px;font-weight:bold;}
-	img{background:white; border:2px outset silver;display:inline-table; width:300px;}
+	body{background:#000;color:#fff;font-size:12px;font-weight:normal;}
 	/*.divDlg{
 	display:block; position:absolute; left:30vw; top:10vh;
 	background: #fff;	border: 2px solid #fff; padding:0.25em; margin:0;
@@ -267,8 +298,19 @@ return false;
 		dlgBody
 	</div>
 	<div class=dlgFooter>
-		<button>Close</button>
+		<button class=dlgButton>Close</button>
 	</div>
 </div>
+
+<style>
+.divBubble{
+	opacity:0;  transition:opacity 10s linear;
+	background-color:white; color:#333; cursor:pointer; height:auto; max-width:20em;
+	border:2px solid #a0f0a0; border-radius:0.8em; outline:0;
+	padding:0.5em; margin:0 0 0 3em;
+	font-family:arial; font-size:1em; font-weight:normal; font-style:normal; text-align:center;
+}
+</style>
+<div id=divBubble class=divBubble onclick='dlgFactory0.msg(this.innerHTML,"Bubble Message")' style='opacity:1'>bubble message</div>
 
 </body>

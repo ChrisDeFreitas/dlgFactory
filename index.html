@@ -61,12 +61,12 @@ text-align:right;
 		top:'20vh', left:'70vw', width:'20em'
 	}
 	dlgFactory0.create(options)
-
+ document.getElementById('divBubble').style.opacity = '1'
 }
 
 var dlgFactory0 = {
 	list: [],
-	bbls:	[],		//list of bubble messages
+	//bbls:	[],		//list of bubble messages
 	options: null,
 	lastid: 0,
 
@@ -87,7 +87,7 @@ var dlgFactory0 = {
 	<button onclick="dlgFactory0.close('${id}')">Close</button>
 </div>
 `
-	var dlg = document.createElement("DIV")
+		var dlg = document.createElement("DIV")
 		dlg.id = id
 		dlg.className='divDlg'
 		dlg.style=`left:${left};top:${top};width:${width};height:${height};`
@@ -103,16 +103,24 @@ var dlgFactory0 = {
 		var bbl = document.createElement("DIV")
 		bbl.id = id
 		bbl.className='divBubble'
-		//dlg.style=`left:${left};top:${top};width:${width};height:${height};`
-		bbl.innerHTML = msg
+		bbl.innerHTML = msg+' '+id
 		bbl.DLGID = this.list.length
 		bbl.dlgFactory0 = this
 		bbl.onclick = function(){
-				this.dlgFactory0.msg(this.innerHTML,"Bubble Message")
+			this.dlgFactory0.msg(this.innerHTML,"Bubble Message")
 		}
-		this.bbls.push(bbl)		//bbls
+		//this.bbls.push(bbl)		//bbls
 		document.body.appendChild(bbl)
-		bbl.style = 'opacity:1;'
+		window.setTimeout(function(){
+			bbl.style = 'opacity:1;'						//fade in
+			window.setTimeout(function(){
+				bbl.style = 'opacity:0;'					//fade out
+				window.setTimeout(function(){
+					document.body.removeChild(bbl)	//destroy
+					console.log('destroyed')
+				}, 1000)
+			}, 5000)
+		}, 250)
 	},
 	close: function(dlgid){
 		var dlg = this.get(dlgid)
@@ -304,13 +312,14 @@ function EventStopBubbling(e) {
 
 <style>
 .divBubble{
-	opacity:0;  transition:opacity 10s linear;
-	background-color:white; color:#333; cursor:pointer; height:auto; max-width:20em;
+	position:relative;
+	opacity:0;  transition:opacity 1s linear;
+	background-color:white; color:#333; cursor:pointer; height:auto; max-width:20em; z-index:1000;
 	border:2px solid #a0f0a0; border-radius:0.8em; outline:0;
-	padding:0.5em; margin:0 0 0 3em;
+	padding:0.5em; margin:0.25em 0 0 3em;
 	font-family:arial; font-size:1em; font-weight:normal; font-style:normal; text-align:center;
 }
 </style>
-<div id=divBubble class=divBubble onclick='dlgFactory0.msg(this.innerHTML,"Bubble Message")' style='opacity:1'>bubble message</div>
+<div id=divBubble class=divBubble onclick='dlgFactory0.msg(this.innerHTML,"Bubble Message")' style=';'>bubble message</div>
 
 </body>

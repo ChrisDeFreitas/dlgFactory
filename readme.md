@@ -3,7 +3,7 @@
 Personal project.  Contact me for details if you wish to use.
 
 ## Features
-- dialog boxes: drag to position, close button, dynamically managed, simple css  
+- dialog boxes: z-index=1000, drag to position, close button, dynamically managed, simple css  
 
 - dlgFactory.msg(message, title)  
 	-- message can be html or text

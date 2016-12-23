@@ -1,3 +1,13 @@
+#repository ignore files:
+.gitconfig
+*.bat
+*.log
+dist/
+node_modules/
+tmp/
+
+
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db

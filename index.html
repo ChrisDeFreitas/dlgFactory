@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta http-equiv="Lang" content="en">
+<meta name="author" content="Chris DeFreitas">
+<script src="https://code.jquery.com/jquery-3.1.1.slim.js"
+			  integrity="sha256-5i/mQ300M779N2OVDrl16lbohwXNUdzL/R2aVUXyXWA="
+			  crossorigin="anonymous"></script>
+<script>
+var dlgFactory0 = {
+	list: [],
+	options: null,
+	lastid: 0,
+
+	create: function(options) {
+		var id = 'dlg'+(++this.lastid),
+		 	left=(options.left ?options.left :'50vw'),
+			top	=(options.top ?options.top :'40vh'),
+			height=(options.height ?options.height :'auto'),
+			width=(options.width ?options.width :'auto'),
+			html = `
+<div class=dlgHeader draggable=true ondragstart="dlgFactory0.dragStart(event, $('#${id}'))" ondragend="dlgFactory0.dragEnd(event, $('#${id}'))">
+	${options.title}
+</div>
+<div class=dlgBody>
+	${options.body}
+</div>
+<div class=dlgFooter>
+	<button onclick="dlgFactory0.close('${id}')">Close</button>
+</div>
+`
+var dlg = document.createElement("DIV")
+		dlg.id = id
+		dlg.className='divDlg'
+		dlg.style=`left:${left};top:${top};width:${width};height:${height};`
+		dlg.innerHTML = html
+		dlg.DLGID = this.list.length
+		dlg.dlgFactory0 = this
+		this.list.push(dlg)
+		document.body.appendChild(dlg)
+	},
+	close: function(dlgid){
+		var dlg = this.get(dlgid)
+		if(dlg===false) return
+		dlg.style.display = 'none'
+		dlg.remove()	//may not be ie compatible
+		delete(this.list[dlg.DLGID])	//ok to leave holes in list
+	},
+	msg: function(msg, title){
+		var options = {
+			title: (title===undefined ?"Message" :title),
+			body: msg,
+			width:'20em'
+		}
+		this.create(options)
+	},
+	bigText: function(msg, title){
+		var options = {
+			title: (title===undefined ?"Information" :title),
+			body: `<textarea class='dlgTextArea'>
+${msg}</textarea>`,
+			top:'35vh', left:'35vw'
+		}
+		this.create(options)
+	},
+	get: function(dlgid){
+		for(var ii in this.list){
+			var dlg = this.list[ii]
+			if(dlg==undefined) continue //deleted item
+			if(dlg.id===dlgid) return dlg
+		}
+		return false
+	},
+	dragStart: function(event, $dragCtrl) {	//allow dragging of windows with eyeball
+	/*
+		bug: event.screenX/Y not always reported correctly in FF or same version on different computers,
+				onDragStart event.screenX/Y, but onDragEnd event.screenX/Y may be off
+				therefore on some machines it may be impossible to position dragged controls
+
+				fails on:
+					Windows7 FF v44, 43, 42
+	*/
+		var targ	= event.target,
+				parent= $dragCtrl[0],
+				ofs 	= $dragCtrl.offset();
+		targ._MAPDRAGDATA = {
+			xoffset: 	event.screenX -ofs.left,			//store offset to top-left corner
+			yoffset: 	event.screenY -ofs.top,
+			movementY: event.movementY,
+			screenY: 	event.screenY,
+			clientY: 	event.clientY,
+			offsetY: 	event.offsetY,
+			ptop: 		ofs.top
+		}
+		parent.style.opacity = 0.5;
+		event.dataTransfer.setData('text/plain', 'Dragging ['+targ.id+']');
+		event.dataTransfer.effectAllowed = "move";
+		event.dataTransfer.dropEffect = "move"
+		//causes drag to fail:  event.preventDefault();
+		//don't return anything either: return EventStopBubbling(event);
+	},
+	dragEnd: function(event, $dragCtrl) {	//allow dragging of windows with eyeball
+	/*
+	bug: event.screenX/Y not always reported correctly in FF or same version on different computers,
+			onDragStart event.screenX/Y, but onDragEnd event.screenX/Y may be off
+			therefore on some machines it may be impossible to position dragged controls
+	*/
+		var targ	= event.target,
+				parent= $dragCtrl[0],	//targ.parentNode,
+				ofs 	= $dragCtrl.offset(),
+			 	data 	= targ._MAPDRAGDATA;
+		parent.style.left = (event.screenX -data.xoffset)+'px';
+		parent.style.top	= (event.screenY -data.yoffset)+'px';
+		parent.style.opacity = 1;
+		//targ.style.cursor = 'pointer'
+		//return EventStopBubbling(event);
+		event.stopPropagation();
+		return false
+	}
+}
+function pageInit(){
+	//allow dlg's to be dragged across doc with drag cursor:
+	document.addEventListener('dragover', function(event){event.preventDefault(); })
+	document.addEventListener('drop', function(event){event.preventDefault(); })
+	var options = {
+		title: 'Test 1',
+		body: 'Hey, Hey Hey! The end is nigh!!!',
+		//top:'20vh', left:'40vw', width:'30em'
+	}
+	dlgFactory0.create(options)
+	dlgFactory0.bigText('Hi')
+
+	var rules = [
+`.divDlg{ display:block; position:absolute; left:30vw; top:10vh;
+background: #fff;	border: 2px solid #fff; outline: 2px outset silver;
+padding:0.25em; margin:0; width: auto;
+font-family:arial; font-weight:normal; text-align:center;
+}`,
+`.dlgHeader {
+background: #a0f0a0;	border:0;	border-radius:0.25em; cursor:pointer; padding:0.25em; margin:0;
+font-size:1.2em; font-weight:bold;
+}`,
+`.dlgBody{
+border:0;	padding:0.5em; margin:0;
+color:#222; font-weight:normal;	text-align:left;
+font-size:1em;
+}`,
+`.dlgTextArea{ border:inset 1px silver; font-family:arial; font-size:1em; padding:0.5em; height:25vh; width:25vw; }`,
+`.dlgFooter{
+border:0;	padding:0.5em 1em 0 1em; margin:0;
+text-align:right;
+}`,
+`.dlgFooter button{
+ background: #a0f0a0;	 border:0; cursor:pointer;
+ color:#fff; font-size:0.8em;
+}`,
+`.dlgFooter button:hover{
+ color:#272;
+}`
+	]
+	addStylesheetRules(rules)
+}
+
+function addStylesheetRules (rules) {
+  var styleEl = document.createElement('style'),
+      styleSheet;
+  document.head.appendChild(styleEl);
+  styleSheet = styleEl.sheet;
+  for (var ii in rules) {
+    styleSheet.insertRule(rules[ii], styleSheet.cssRules.length);
+  }
+}
+
+//allow dragging of windows with eyeball
+function dragStart(event, $dragCtrl) {
+/*
+	bug: event.screenX/Y not always reported correctly in FF or same version on different computers,
+			onDragStart event.screenX/Y, but onDragEnd event.screenX/Y may be off
+			therefore on some machines it may be impossible to position dragged controls
+
+			fails on:
+				Windows7 FF v44, 43, 42
+*/
+	var targ	= event.target,
+			parent= $dragCtrl[0],
+			ofs 	= $dragCtrl.offset();
+	targ._MAPDRAGDATA = {
+		xoffset: 	event.screenX -ofs.left,			//store offset to top-left corner
+		yoffset: 	event.screenY -ofs.top,
+		movementY: event.movementY,
+		screenY: 	event.screenY,
+		clientY: 	event.clientY,
+		offsetY: 	event.offsetY,
+		ptop: 		ofs.top
+	}
+	parent.style.opacity = 0.5;
+	event.dataTransfer.setData('text/plain', 'Dragging ['+targ.id+']');
+	event.dataTransfer.effectAllowed = "move";
+	event.dataTransfer.dropEffect = "move"
+	//targ.style.cursor = 'move'
+	//causes drag to fail:  event.preventDefault();
+	//don't return anything either: return EventStopBubbling(event);
+}
+function dragEnd(event, $dragCtrl) {	//allow dragging of windows with eyeball
+/*
+bug: event.screenX/Y not always reported correctly in FF or same version on different computers,
+		onDragStart event.screenX/Y, but onDragEnd event.screenX/Y may be off
+		therefore on some machines it may be impossible to position dragged controls
+*/
+	var targ	= event.target,
+			parent= $dragCtrl[0],	//targ.parentNode,
+			ofs 	= $dragCtrl.offset(),
+		 	data 	= targ._MAPDRAGDATA;
+	parent.style.left = (event.screenX -data.xoffset)+'px';
+	parent.style.top	= (event.screenY -data.yoffset)+'px';
+	parent.style.opacity = .95;
+	//targ.style.cursor = 'pointer'
+	return EventStopBubbling(event);
+}
+function EventStopBubbling(e) {
+//if(e.preventDefault) e.preventDefault();
+if(e.stopPropagation) e.stopPropagation();
+else e.cancelBubble=true;
+return false;
+}
+</script>
+<style>
+	body{background:#000;color:#fff;font-size:12px;font-weight:bold;}
+	img{background:white; border:2px outset silver;display:inline-table; width:300px;}
+	/*.divDlg{
+	display:block; position:absolute; left:30vw; top:10vh;
+	background: #fff;	border: 2px solid #fff; padding:0.25em; margin:0;
+	width: 10em;
+	outline: 2px outset silver;
+	font-family:arial; font-weight:normal; text-align:center;
+	}
+	.dlgHeader {
+	background: #a0f0a0;	border:0;	border-radius:0.25em; cursor:pointer; padding:0.25em; margin:0;
+	font-size:1.2em; font-weight:bold;
+	}
+	.dlgBody{
+	border:0;	padding:0.5em; margin:0;
+	color:#222; font-weight:normal;	text-align:left;
+	font-size:1em;
+	}
+	.dlgTextArea{ border:inset 1px silver; font-family:arial; font-size:1em; padding:0.5em; height:25vh; width:25vw; }
+	.dlgFooter{
+	border:0;	padding:0.5em 1em 0 1em; margin:0;
+	text-align:right;
+	}
+	.dlgFooter button{
+	 background: #a0f0a0;	 border:0; cursor:pointer;
+	 color:#fff; font-size:0.8em;
+	}
+	.dlgFooter button:hover{
+	 color:#272;
+	}*/
+</style>
+</head>
+<body onload='pageInit()'>
+
+<div id=divDlg class=divDlg >
+	<div class=dlgHeader draggable=true ondragstart="dragStart(event, $('#divDlg'))" ondragend="dragEnd(event, $('#divDlg'))">
+		dlgHeader
+	</div>
+	<div class=dlgBody>
+		dlgBody
+	</div>
+	<div class=dlgFooter>
+		<button>Close</button>
+	</div>
+</div>
+
+</body>

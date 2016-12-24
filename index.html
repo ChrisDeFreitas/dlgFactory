@@ -104,20 +104,61 @@ var dlgFactory0 = {
 		bbl.id = id
 		bbl.className='divBubble'
 		bbl.innerHTML = msg+' '+id
-		bbl.DLGID = this.list.length
 		bbl.dlgFactory0 = this
 		bbl.onclick = function(){
 			this.dlgFactory0.msg(this.innerHTML,"Bubble Message")
 		}
-		//this.bbls.push(bbl)		//bbls
+/*
+	bbl.bblSibling = null
+	bbl.bblUpdate = function(top) {
+		this.style.top = top
+		if(this.bllSibling != null)
+			this.bllSibling.bblUpdate(this.style.top)
+	}
+this.bllChangesLocked = true //prevent sync problems
+	if(this.bblLast != null){
+		this.bblLast.bblSibling = bbl		//assign sibling
+		bbl.style.top = this.bblLast.style.top +this.bblLast.outerHeight	//assign bbl.top
+	}
+	this.bblDivLast = bll							//assign new last bbl div
+...
+doc.append(bbl)
+...
+this.bllChangesLocked = false //prevent sync problems
+*/
 		document.body.appendChild(bbl)
 		window.setTimeout(function(){
 			bbl.style = 'opacity:1;'						//fade in
+			console.log(performance.now())
 			window.setTimeout(function(){
 				bbl.style = 'opacity:0;'					//fade out
+				console.log(performance.now())
 				window.setTimeout(function(){
+/*
+var ctr = 0
+while(dlgFactory.bllChangesLocked===true) {
+	// wait, do nothing, if counter > 10000 warn user
+	ctr++
+	if(counter > 10000){
+			alert('Bubble Messages are locked up?')
+			break;	 //continue because pause was too long
+	}
+}
+*/
 					document.body.removeChild(bbl)	//destroy
 					console.log('destroyed')
+					console.log(performance.now())
+				/*
+					dlgFactory.bblRemove(this)
+dlgFactory.bblRemove = function(bbl){
+	document.body.removeChild(bbl)	//destroy
+	console.log('destroyed:', bbl.id)
+	if(this.bblLast.id === bbl.id)			//update our info
+		this.bblLast = bbl.bblSibling
+	if(bbl.bllSibling != null)					//update siblings position, will riple through siblings
+		bblSibling.bblUpdate(bbl.style.top)
+}
+				*/
 				}, 1000)
 			}, 5000)
 		}, 250)

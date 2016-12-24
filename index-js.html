@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta http-equiv="Lang" content="en">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta name="author" content="Chris DeFreitas">
+<script src="dlgFactory.js"></script>
+<script>
+"use strict"
+
+function pageInit(){
+	var options = {
+		title: 'Control Panel',
+		body: `
+		<style>#cpDiv{color:#000} #cpDiv label{display:block;} #cpDiv button{width:5em; float:right}</style>
+		<div id=cpDiv>
+		<label> msg(hi) <button onclick="dlgFactory.msg('Hi','Control Panel Test')" class=dlgButton>Test</button></label>
+		<label> bubble(what!?) <button onclick="dlgFactory.bbl('What!?','Control Panel Test')" class=dlgButton>Test</button></label>
+		</div>
+		`,
+		top:'20vh', left:'70vw', width:'20em'
+	}
+	dlgFactory.create(options)
+}
+</script>
+<style>
+body{font-family:arial; font-size:12px; }
+</style>
+</head>
+<body onload='pageInit()'>
+
+<style>
+</body>

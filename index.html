@@ -2,13 +2,16 @@
 <html><head>
 <meta charset="utf-8">
 <meta http-equiv="Lang" content="en">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 <meta name="author" content="Chris DeFreitas">
-<script src="https://code.jquery.com/jquery-3.1.1.slim.js"
+<!--script src="https://code.jquery.com/jquery-3.1.1.slim.js"
 			  integrity="sha256-5i/mQ300M779N2OVDrl16lbohwXNUdzL/R2aVUXyXWA="
-			  crossorigin="anonymous"></script>
+			  crossorigin="anonymous"></script-->
 <script>
+"use strict"
+
 function pageInit(){
-	//allow dlg's to be dragged across doc with drag cursor:
+	//allow dlg's to be dragged across doc with the drag cursor:
 	document.addEventListener('dragover', function(event){event.preventDefault(); })
 	document.addEventListener('drop', function(event){event.preventDefault(); })
 	var options = {
@@ -54,8 +57,8 @@ text-align:right;
 		body: `
 		<style>#cpDiv{color:#000} #cpDiv label{display:block;} #cpDiv button{width:5em; float:right}</style>
 		<div id=cpDiv>
-		<label> msg(hi): <button onclick="dlgFactory0.msg('Hi','Control Panel Test')" class=dlgButton>Test</button></label>
-		<label> bubble(what!?): <button onclick="dlgFactory0.bbl('What!?','Control Panel Test')" class=dlgButton>Test</button></label>
+		<label> msg(hi) <button onclick="dlgFactory0.msg('Hi','Control Panel Test')" class=dlgButton>Test</button></label>
+		<label> bubble(what!?) <button onclick="dlgFactory0.bbl('What!?','Control Panel Test')" class=dlgButton>Test</button></label>
 		</div>
 		`,
 		top:'20vh', left:'70vw', width:'20em'
@@ -66,7 +69,7 @@ text-align:right;
 
 var dlgFactory0 = {
 	list: [],
-	//bbls:	[],		//list of bubble messages
+	bblsLast:	null,		//last bubble messages created
 	options: null,
 	lastid: 0,
 
@@ -77,14 +80,14 @@ var dlgFactory0 = {
 			height=(options.height ?options.height :'auto'),
 			width=(options.width ?options.width :'auto'),
 			html = `
-<div class=dlgHeader draggable=true ondragstart="dlgFactory0.dragStart(event, $('#${id}'))" ondragend="dlgFactory0.dragEnd(event, $('#${id}'))">
+<div class=dlgHeader draggable=true ondragstart="dlgFactory0.dragStart(event)" ondragend="dlgFactory0.dragEnd(event)">
 	${options.title}
 </div>
 <div class=dlgBody>
 	${options.body}
 </div>
 <div class=dlgFooter>
-	<button onclick="dlgFactory0.close('${id}')">Close</button>
+	<button onclick="dlgFactory0.close('${id}')" class=dlgButton>Close</button>
 </div>
 `
 		var dlg = document.createElement("DIV")
@@ -108,60 +111,40 @@ var dlgFactory0 = {
 		bbl.onclick = function(){
 			this.dlgFactory0.msg(this.innerHTML,"Bubble Message")
 		}
-/*
-	bbl.bblSibling = null
-	bbl.bblUpdate = function(top) {
-		this.style.top = top
-		if(this.bllSibling != null)
-			this.bllSibling.bblUpdate(this.style.top)
-	}
-this.bllChangesLocked = true //prevent sync problems
-	if(this.bblLast != null){
-		this.bblLast.bblSibling = bbl		//assign sibling
-		bbl.style.top = this.bblLast.style.top +this.bblLast.outerHeight	//assign bbl.top
-	}
-	this.bblDivLast = bll							//assign new last bbl div
-...
-doc.append(bbl)
-...
-this.bllChangesLocked = false //prevent sync problems
-*/
+		bbl.bblSibling = null
+		bbl.bblUpdate = function(top) {
+			var lasttop = this.style.top
+			this.style.top = top
+			if(this.bblSibling != null)
+				this.bblSibling.bblUpdate(lasttop)
+		}
+		var bbltop = '5px'
+		if(this.bblLast != null){
+			this.bblLast.bblSibling = bbl		//assign sibling
+			bbltop = (this.bblLast.offsetTop  +this.bblLast.offsetHeight +10)+'px' 	//assign bbl.top
+		}
+		bbl.style.top = bbltop
+		this.bblLast = bbl							//assign new last bbl div
 		document.body.appendChild(bbl)
 		window.setTimeout(function(){
-			bbl.style = 'opacity:1;'						//fade in
-			console.log(performance.now())
+			bbl.style.top = bbltop
+			bbl.style.opacity = 1						//fade in
 			window.setTimeout(function(){
-				bbl.style = 'opacity:0;'					//fade out
-				console.log(performance.now())
-				window.setTimeout(function(){
-/*
-var ctr = 0
-while(dlgFactory.bllChangesLocked===true) {
-	// wait, do nothing, if counter > 10000 warn user
-	ctr++
-	if(counter > 10000){
-			alert('Bubble Messages are locked up?')
-			break;	 //continue because pause was too long
-	}
-}
-*/
-					document.body.removeChild(bbl)	//destroy
-					console.log('destroyed')
-					console.log(performance.now())
-				/*
-					dlgFactory.bblRemove(this)
-dlgFactory.bblRemove = function(bbl){
-	document.body.removeChild(bbl)	//destroy
-	console.log('destroyed:', bbl.id)
-	if(this.bblLast.id === bbl.id)			//update our info
-		this.bblLast = bbl.bblSibling
-	if(bbl.bllSibling != null)					//update siblings position, will riple through siblings
-		bblSibling.bblUpdate(bbl.style.top)
-}
-				*/
+				bbl.style.opacity = 0					//fade out
+				//console.log(performance.now())
+				window.setTimeout(function(){			//destroy
+					dlgFactory0.bblRemove(bbl)
 				}, 1000)
-			}, 5000)
+			}, 7000)
 		}, 250)
+	},
+	bblRemove: function(bbl){
+		document.body.removeChild(bbl)	//destroy
+		console.log('destroyed:', bbl.id)
+		if(this.bblLast.id === bbl.id)			//update our info
+			this.bblLast = null	//no other bbl's
+		if(bbl.bblSibling != null)					//update siblings position, will riple through siblings
+			bbl.bblSibling.bblUpdate(bbl.style.top)
 	},
 	close: function(dlgid){
 		var dlg = this.get(dlgid)
@@ -194,7 +177,7 @@ dlgFactory.bblRemove = function(bbl){
 		}
 		return false
 	},
-dragStart: function(event, $dragCtrl) {	//allow dragging of windows with eyeball
+dragStart: function(event) {	//allow dragging of windows with eyeball
 	/*
 		bug: event.screenX/Y not always reported correctly in FF or same version on different computers,
 				onDragStart event.screenX/Y, but onDragEnd event.screenX/Y may be off
@@ -203,17 +186,16 @@ dragStart: function(event, $dragCtrl) {	//allow dragging of windows with eyeball
 				fails on:
 					Windows7 FF v44, 43, 42
 	*/
-		var targ	= event.target,
-				parent= $dragCtrl[0],
-				ofs 	= $dragCtrl.offset();
+	var targ	= event.target,
+			parent= targ.parentNode
 		targ._MAPDRAGDATA = {
-			xoffset: 	event.screenX -ofs.left,			//store offset to top-left corner
-			yoffset: 	event.screenY -ofs.top,
+			xoffset: 	event.screenX -parent.offsetLeft,			//store offset to top-left corner
+			yoffset: 	event.screenY -parent.offsetTop,
 			movementY: event.movementY,
 			screenY: 	event.screenY,
 			clientY: 	event.clientY,
 			offsetY: 	event.offsetY,
-			ptop: 		ofs.top
+			ptop: 		parent.offsetTop
 		}
 		parent.style.opacity = 0.5;
 		event.dataTransfer.setData('text/plain', 'Dragging ['+targ.id+']');
@@ -222,16 +204,15 @@ dragStart: function(event, $dragCtrl) {	//allow dragging of windows with eyeball
 		//causes drag to fail:  event.preventDefault();
 		//don't return anything either: return EventStopBubbling(event);
 	},
-dragEnd: function(event, $dragCtrl) {	//allow dragging of windows with eyeball
+dragEnd: function(event) {	//allow dragging of windows with eyeball
 	/*
 	bug: event.screenX/Y not always reported correctly in FF or same version on different computers,
 			onDragStart event.screenX/Y, but onDragEnd event.screenX/Y may be off
 			therefore on some machines it may be impossible to position dragged controls
 	*/
-		var targ	= event.target,
-				parent= $dragCtrl[0],	//targ.parentNode,
-				ofs 	= $dragCtrl.offset(),
-			 	data 	= targ._MAPDRAGDATA;
+	var targ	= event.target,
+			parent= targ.parentNode,
+		 	data 	= targ._MAPDRAGDATA;
 		parent.style.left = (event.screenX -data.xoffset)+'px';
 		parent.style.top	= (event.screenY -data.yoffset)+'px';
 		parent.style.opacity = 1;
@@ -253,7 +234,7 @@ function addStylesheetRules (rules) {
 }
 
 //allow dragging of windows with eyeball
-function dragStart(event, $dragCtrl) {
+function dragStart(event, dragCtrl) {
  /*
 	bug: event.screenX/Y not always reported correctly in FF or same version on different computers,
 			onDragStart event.screenX/Y, but onDragEnd event.screenX/Y may be off
@@ -263,16 +244,15 @@ function dragStart(event, $dragCtrl) {
 				Windows7 FF v44, 43, 42
  */
 	var targ	= event.target,
-			parent= $dragCtrl[0],
-			ofs 	= $dragCtrl.offset();
+			parent= targ.parentNode
 	targ._MAPDRAGDATA = {
-		xoffset: 	event.screenX -ofs.left,			//store offset to top-left corner
-		yoffset: 	event.screenY -ofs.top,
+		xoffset: 	event.screenX -parent.offsetLeft,			//store offset to top-left corner
+		yoffset: 	event.screenY -parent.offsetTop,
 		movementY: event.movementY,
 		screenY: 	event.screenY,
 		clientY: 	event.clientY,
 		offsetY: 	event.offsetY,
-		ptop: 		ofs.top
+		ptop: 		parent.offsetTop
 	}
 	parent.style.opacity = 0.5;
 	event.dataTransfer.setData('text/plain', 'Dragging ['+targ.id+']');
@@ -288,9 +268,8 @@ function dragEnd(event, $dragCtrl) {	//allow dragging of windows with eyeball
 		onDragStart event.screenX/Y, but onDragEnd event.screenX/Y may be off
 		therefore on some machines it may be impossible to position dragged controls
  */
-	var targ	= event.target,
-			parent= $dragCtrl[0],	//targ.parentNode,
-			ofs 	= $dragCtrl.offset(),
+ var targ	= event.target,
+		 parent= targ.parentNode,
 		 	data 	= targ._MAPDRAGDATA;
 	parent.style.left = (event.screenX -data.xoffset)+'px';
 	parent.style.top	= (event.screenY -data.yoffset)+'px';
@@ -340,7 +319,7 @@ function EventStopBubbling(e) {
 <body onload='pageInit()'>
 
 <div id=divDlg class=divDlg >
-	<div class=dlgHeader draggable=true ondragstart="dragStart(event, $('#divDlg'))" ondragend="dragEnd(event, $('#divDlg'))">
+	<div class=dlgHeader draggable=true ondragstart="dragStart(event)" ondragend="dragEnd(event)">
 		dlgHeader
 	</div>
 	<div class=dlgBody>
@@ -352,15 +331,16 @@ function EventStopBubbling(e) {
 </div>
 
 <style>
-.divBubble{
-	position:relative;
-	opacity:0;  transition:opacity 1s linear;
-	background-color:white; color:#333; cursor:pointer; height:auto; max-width:20em; z-index:1000;
+.divBubble{	/* height:auto;  */
+	position:fixed; left:3vw;
+	opacity:0;  transition:top 1s, opacity 1s linear;
+	background-color:white; color:#333; cursor:pointer; width:20em; z-index:1000;
 	border:2px solid #a0f0a0; border-radius:0.8em; outline:0;
-	padding:0.5em; margin:0.25em 0 0 3em;
+	padding:0.5em; margin:0;
 	font-family:arial; font-size:1em; font-weight:normal; font-style:normal; text-align:center;
 }
 </style>
-<div id=divBubble class=divBubble onclick='dlgFactory0.msg(this.innerHTML,"Bubble Message")' style=';'>bubble message</div>
-
+<div id=divBubble class=divBubble onclick='dlgFactory0.msg(this.innerHTML,"Bubble Message")' style=''>bubble message</div>
+<button onclick="document.getElementById('DivDiv').style.top=(document.getElementById('DivDiv').offsetTop+30)+'px'; document.getElementById('DivDiv').style.opacity=1;">inc</button>
+<div id=DivDiv style="position:fixed;opacity:0;  transition:opacity 1s linear;">DivDiv</div>
 </body>

@@ -1,6 +1,8 @@
 # dlgFactory
 
-Personal project.  Contact me for details if you wish to use.
+This is a very early version of the concept.  I've used and expanded it much over the years.  A good example of its usage is in the <a href="https://github.com/ChrisDeFreitas/Electron-FolderView">Electron Folder View</a> application.
+
+Feel free to use and modify.
 
 ## Features
 - dialog boxes: z-index=1000, drag to position, close button, dynamically managed, simple css  
